@@ -2,6 +2,7 @@
 
 
 -------------------------*********  07-Jun-2023 *********------------------------------
+
 *- Se actualiza el archivo "gitignore" añadiendo nuevas especificaciones.
 
 *- Se sube el avance del proyecto donde las consultas 2, 3, 4, 5 y 6 funcionan. La consulta 1 aún no ha sido implementada
@@ -16,3 +17,5 @@ correctos de las consultas al contrastarlos con la fuente de datos. No sucede lo
 
 *- Se incorpora al código las métricas para el tiempo de ejecución de las consultas y carga de datos así como también
 la cantidad de memoria ram utilizada por cada una de ellas.
+
+*- Se avanza en agregar los comentarios explicando el código.

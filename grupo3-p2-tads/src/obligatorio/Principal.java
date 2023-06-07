@@ -57,7 +57,7 @@ public class Principal {
 
                     MemoryMXBean memoryBean = ManagementFactory.getMemoryMXBean();
                     MemoryUsage memoryUsage = memoryBean.getHeapMemoryUsage();
-                    long memoryUsed = memoryUsage.getUsed();
+
 
                     System.out.println("Carga de datos seleccionada");
                     bettingHouse.loadDriversData();
@@ -65,6 +65,7 @@ public class Principal {
                     timeEnd = System.currentTimeMillis();
                     System.out.println("Carga de datos exitosa, tiempo de ejecucion de carga: "+ (timeEnd -
                             timeStart) +" milisegundos");
+                    long memoryUsed = memoryUsage.getUsed();
                     System.out.println("Memoria utilizada: " + memoryUsed + " bytes");
                     exit = true;
                     dataLoaded = true;

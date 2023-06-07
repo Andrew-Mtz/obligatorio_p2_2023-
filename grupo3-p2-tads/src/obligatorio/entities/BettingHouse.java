@@ -301,23 +301,40 @@ public class BettingHouse {
     // Terminamos con los métodos para cargar la información cuya fuente son archivos externos (TXT y CSV)
     // y pasamos a definir las funciones/métodos de CONSULTA.
 
+
     public void distinctHashTagsForDay(Date date) {
 
+        // Inciamos el reloj del tiempo y el contador de utilización de memoria RAM.
         long timeStart, timeEnd;
         timeStart = System.currentTimeMillis();
 
         MemoryMXBean memoryBean = ManagementFactory.getMemoryMXBean();
         MemoryUsage memoryUsage = memoryBean.getHeapMemoryUsage();
-        long memoryUsed = memoryUsage.getUsed();
 
-        //
+
+        // Creamos una ListaEnlazada donde guardaremos al final los valores de los diferentes hashTags
+        // asociados a una fecha determinada.
+
+        // Creamos una array llamado "tempList" que contendrá TODOS los elementos del HashMap (es decir,
+        // los "nodos" o "HashEntry" que se encuentran en el array subyacente del Hashmap. Son objetos
+        // con un "key" y un "value", donde en este caso la "key" es el resultado de pasar el texto del
+        // hashTag por la HashFunction y el value es el propio objeto de la clase HashTag).
         MyList<String> list = new ListaEnlazada<>();
         HashEntry<KeyHashTag, HashTag>[] tempList = this.hashTags.getValues();
 
+        // Iteramos por cada uno de los elementos de la lista "tempList" que contiene objetos HashEntry.
         for (int i = 1; i < tempList.length; i++) {
             if (tempList[i] != null) {
+
+                // Accedemos al VALOR del elemento en la posición "i" de la lista. Es decir, al objeto de la
+                // clase HashTag y en particular a la lista de fechas que tiene asociadas.
                 for (Date dateHashTag : tempList[i].getValue().getDatesOfHashTag()) {
+
+                    // Si la fecha coincide con alguna de las fechas asociadas al HashTag
                     if (dateHashTag.equals(date)) {
+
+                        // Si en la lista NO se encuentra el texto asociado al HashTag (que es el propio
+                        // HashTag, por ejemplo, "F1", "QatarGP") entonces se agrega a la lista.
                         if (!list.contains(tempList[i].getValue().getText())){
                             list.add(tempList[i].getValue().getText());
                         }
@@ -329,40 +346,73 @@ public class BettingHouse {
 
         timeEnd = System.currentTimeMillis();
         System.out.println("Tiempo de ejecucion de la consulta: "+ ( timeEnd - timeStart ) +" milisegundos");
+
+        long memoryUsed = memoryUsage.getUsed();
         System.out.println("Memoria utilizada: " + memoryUsed + " bytes");
 
     }
 
+
+    // ----------------------------***********************************------------------------------
+
+
     public void top10Drivers(Date date) {
 
+        // Inciamos el reloj del tiempo y el contador de utilización de memoria RAM.
         long timeStart, timeEnd;
         timeStart = System.currentTimeMillis();
 
         MemoryMXBean memoryBean = ManagementFactory.getMemoryMXBean();
         MemoryUsage memoryUsage = memoryBean.getHeapMemoryUsage();
-        long memoryUsed = memoryUsage.getUsed();
 
+        // Creamos una array llamado "tempList" que contendrá TODOS los elementos del HashMap (es decir,
+        // los "nodos" o "HashEntry" que se encuentran en el array subyacente del Hashmap. Son objetos
+        // con un "key" y un "value", donde en este caso la "key" es el resultado de pasar el id del
+        // hashTag por la HashFunction y el value es el propio objeto de la clase Tweet).
         HashEntry<Long, Tweet>[] tempList = this.tweets.getValues();
+
+        // Creo un array llamado "list" que contendrá objetos del tipo HeapEntry cuyo Value son objetos
+        // de la clase Driver. El tamaño del array es fijo en 20, pues ese es la cantidad de pilotos activos.
+        // "list" será el insumo para crear el HeapMax.
         HeapEntry<Driver>[] list = new HeapEntry[20];
+
+        // Creo un heap que contendrá elementos de la clase HeapEntry (que a su vez contiene elementos de la
+        // clase "Driver") que son cargados a través del array "list". El heap se comporta como un HeapMax.
+        // Por ahora el heap llamado  "heapQuery" se ha creado vacío teniendo por insumo un array con lenght = 20
         MyHeap<HeapEntry<Driver>> heapQuery = new MyHeapImpl<>(list, true);
 
+        // Itero sobre la ListaEnlazada de "drivers" de la clase BettingHouse
         for (Driver driver : this.drivers) {
+
+            // Itero sobre el array de objetos HashEnty de tweets
             for (int i = 1; i < tempList.length; i++) {
                 if (tempList[i] != null) {
                     int count = 0;
+                    // Accedo al objeto de la clase Tweet contenido en la instancia de la clase HashEntry
                     Tweet temp = tempList[i].getValue();
+                    // Si las fechas asociadas a ese tweet coinciden con la ingresada por el usuario
                     if (temp.getDate().equals(date)) {
+                        // Verificamos si el nombre o el apellido del piloto aparece en el contenido del tweet.
                         if (temp.getContent().contains(driver.getName()) || temp.getContent().contains(driver.getLastName())) {
+                            // Si aparece, acumulamos +1 en el contador asociado a ESE driver en particular
+                            // Este count será la "key" con la cual se ordenan los objetos en el heapMax
                             count += 1;
                         }
                     }
+                    // Al terminar de verificar la cantidad de veces que un piloto particular ha sido nombrado en
+                    // el contenido de todos los tweet para una fecha determinada, se agrega dicha instancia de
+                    // "driver" asociada a la "key = cantidad de veces que fue nombrado" al heapMax.
                     HeapEntry<Driver> node = new HeapEntry<>(count, driver);
                     heapQuery.insert(node);
                 }
             }
         }
 
+        // Al terminar de verificar todos los pilotos y habiendo completado el heapMax, ya tenemos los elementos
+        // ordenados de acuerdo a la cantidad de veces que son nombrados en el contenido de los tweet para una
+        // fecha particular. El top 10 lo obtenemos extrayendo los elementos de las 10 "raices" del heapMax
         for (int i = 1; i <= 10; i++) {
+            // Extraigo el elemento de la raíz
             HeapEntry<Driver> temp = heapQuery.deleteAndReturn();
             if (temp != null) {
                 System.out.println("Nombre de piloto: " + temp.getValue().getName() + " " + temp.getValue().getLastName());
@@ -372,38 +422,61 @@ public class BettingHouse {
 
         timeEnd = System.currentTimeMillis();
         System.out.println("Tiempo de ejecucion de la consulta: "+ ( timeEnd - timeStart ) +" milisegundos");
+
+        long memoryUsed = memoryUsage.getUsed();
         System.out.println("Memoria utilizada: " + memoryUsed + " bytes");
 
     }
 
+
+    // ----------------------------***********************************------------------------------
     public void mostUsedHashTagForDay(Date date) {
 
+        // Inciamos el reloj del tiempo y el contador de utilización de memoria RAM.
         long timeStart, timeEnd;
         timeStart = System.currentTimeMillis();
 
         MemoryMXBean memoryBean = ManagementFactory.getMemoryMXBean();
         MemoryUsage memoryUsage = memoryBean.getHeapMemoryUsage();
-        long memoryUsed = memoryUsage.getUsed();
 
+        // Tamaño del HashMap que contiene a los objetos de la clase HashTag
         int size = this.hashTags.size();
+
+        // Array que contiene TODOS los elementos del tipo HashEntry que se encuentran en el HashMap
         HashEntry<KeyHashTag, HashTag>[] tempList = this.hashTags.getValues();
+
+        // Lista vacía con el mismo tamaño del HashMap de hasTags que utilizaré a continuación para
+        // crear un heap vacío donde almacenaré objetos del tipo "HeapEntry" que a su vez contendrán objetos
+        // de la clase HashTag y se comportará como un heapMax.
         HeapEntry<HashTag>[] list = new HeapEntry[size];
         MyHeap<HeapEntry<HashTag>> heapQuery = new MyHeapImpl<>(list, true);
 
+        // Itero sobre cada elemento del array que contiene los objetos HashEntry de hashTag
         for (int i = 1; i < tempList.length; i++) {
             if (tempList[i] != null) {
                 int count = 0;
+                // Accedo al objeto de la clase HashTag que está contenido como el "value" en el objeto HashEntry
                 HashTag temp = tempList[i].getValue();
+                // Itero sobre las fechas asociadas a ESA instancia de la clase HashTag
                 for (Date dateHashTag : temp.getDatesOfHashTag()) {
                     if (dateHashTag.equals(date)) {
+                        // Acumulo +1 cada vez que aparece la fecha indicada por el usuario en la lista de fechas
+                        // que ESE hashTag en particular tiene asociadas.
                         count +=1;
                     }
                 }
-                HeapEntry<HashTag> node = new HeapEntry<>(count, temp);  // key del heap para ordenar es cantidad de tweets
+
+                // Al terminar de verificar la cantidad de veces que un hashtag particular ha sido nombrado en
+                // una fecha determinada, se agrega dicha instancia de "HashTag" asociada a la
+                // "key = cantidad de veces que fue nombrado" al heapMax.
+                HeapEntry<HashTag> node = new HeapEntry<>(count, temp);
                 heapQuery.insert(node);
             }
         }
 
+        // Al terminar de verificar todos los hashTagsy habiendo completado el heapMax, ya tenemos los elementos
+        // ordenados de acuerdo a la cantidad de veces que son nombrados dichos hashTags para una
+        // fecha particular. El top 10 lo obtenemos extrayendo los elementos de las 10 "raices" del heapMax
         boolean hashTagFound = false;
         while (!hashTagFound){
             HeapEntry<HashTag> temp = heapQuery.deleteAndReturn();
@@ -415,9 +488,14 @@ public class BettingHouse {
 
         timeEnd = System.currentTimeMillis();
         System.out.println("Tiempo de ejecucion de la consulta: "+ ( timeEnd - timeStart ) +" milisegundos");
+
+        long memoryUsed = memoryUsage.getUsed();
         System.out.println("Memoria utilizada: " + memoryUsed + " bytes");
 
     }
+
+
+    // ----------------------------***********************************------------------------------
 
     public void top15UsersWithMoreTweets() {
 
@@ -426,7 +504,7 @@ public class BettingHouse {
 
         MemoryMXBean memoryBean = ManagementFactory.getMemoryMXBean();
         MemoryUsage memoryUsage = memoryBean.getHeapMemoryUsage();
-        long memoryUsed = memoryUsage.getUsed();
+
 
         int size = this.users.size();
         HashEntry<KeyUser, User>[] tempList = this.users.getValues();
@@ -453,6 +531,8 @@ public class BettingHouse {
 
         timeEnd = System.currentTimeMillis();
         System.out.println("Tiempo de ejecucion de la consulta: "+ (timeEnd - timeStart) +" milisegundos");
+
+        long memoryUsed = memoryUsage.getUsed();
         System.out.println("Memoria utilizada: " + memoryUsed + " bytes");
 
     }
@@ -464,7 +544,7 @@ public class BettingHouse {
 
         MemoryMXBean memoryBean = ManagementFactory.getMemoryMXBean();
         MemoryUsage memoryUsage = memoryBean.getHeapMemoryUsage();
-        long memoryUsed = memoryUsage.getUsed();
+
 
         int size = this.users.size();
         HashEntry<KeyUser, User>[] tempList = this.users.getValues();
@@ -490,10 +570,16 @@ public class BettingHouse {
 
         timeEnd = System.currentTimeMillis();
         System.out.println("Tiempo de ejecucion de la consulta: "+ (timeEnd - timeStart) +" milisegundos");
+
+        long memoryUsed = memoryUsage.getUsed();
         System.out.println("Memoria utilizada: " + memoryUsed + " bytes");
 
     }
 
+
+
+    // ESTA FUNCION ES LA QUE NO ESTÁ TERMINADA!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    // REVISAR!!!!!!!!!!!!!!!!!!!!!
     public void tweetsWithSpecificContent(String content) {
 
         long timeStart, timeEnd;
@@ -501,7 +587,7 @@ public class BettingHouse {
 
         MemoryMXBean memoryBean = ManagementFactory.getMemoryMXBean();
         MemoryUsage memoryUsage = memoryBean.getHeapMemoryUsage();
-        long memoryUsed = memoryUsage.getUsed();
+
 
         int count = 0;
         Pattern pattern = Pattern.compile(Pattern.quote(content), Pattern.CASE_INSENSITIVE);
@@ -516,6 +602,8 @@ public class BettingHouse {
 
         timeEnd = System.currentTimeMillis();
         System.out.println("Tiempo de ejecucion de la consulta: "+ (timeEnd - timeStart) +" milisegundos");
+
+        long memoryUsed = memoryUsage.getUsed();
         System.out.println("Memoria utilizada: " + memoryUsed + " bytes");
     }
 
