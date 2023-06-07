@@ -16,6 +16,9 @@ import uy.edu.um.prog2.adt.heap.MyHeapImpl;
 import uy.edu.um.prog2.adt.lista.ListaEnlazada;
 import uy.edu.um.prog2.adt.lista.MyList;
 import java.io.*;
+import java.lang.management.ManagementFactory;
+import java.lang.management.MemoryMXBean;
+import java.lang.management.MemoryUsage;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.regex.Pattern;
@@ -300,6 +303,13 @@ public class BettingHouse {
 
     public void distinctHashTagsForDay(Date date) {
 
+        long timeStart, timeEnd;
+        timeStart = System.currentTimeMillis();
+
+        MemoryMXBean memoryBean = ManagementFactory.getMemoryMXBean();
+        MemoryUsage memoryUsage = memoryBean.getHeapMemoryUsage();
+        long memoryUsed = memoryUsage.getUsed();
+
         //
         MyList<String> list = new ListaEnlazada<>();
         HashEntry<KeyHashTag, HashTag>[] tempList = this.hashTags.getValues();
@@ -316,9 +326,22 @@ public class BettingHouse {
             }
         }
         System.out.println("Cantidad de hashTags distintos para el día: " + list.getSize());
+
+        timeEnd = System.currentTimeMillis();
+        System.out.println("Tiempo de ejecucion de la consulta: "+ ( timeEnd - timeStart ) +" milisegundos");
+        System.out.println("Memoria utilizada: " + memoryUsed + " bytes");
+
     }
 
     public void top10Drivers(Date date) {
+
+        long timeStart, timeEnd;
+        timeStart = System.currentTimeMillis();
+
+        MemoryMXBean memoryBean = ManagementFactory.getMemoryMXBean();
+        MemoryUsage memoryUsage = memoryBean.getHeapMemoryUsage();
+        long memoryUsed = memoryUsage.getUsed();
+
         HashEntry<Long, Tweet>[] tempList = this.tweets.getValues();
         HeapEntry<Driver>[] list = new HeapEntry[20];
         MyHeap<HeapEntry<Driver>> heapQuery = new MyHeapImpl<>(list, true);
@@ -346,9 +369,22 @@ public class BettingHouse {
                 System.out.println("Cantidad de ocurrencias: " + temp.getKey());
             }
         }
+
+        timeEnd = System.currentTimeMillis();
+        System.out.println("Tiempo de ejecucion de la consulta: "+ ( timeEnd - timeStart ) +" milisegundos");
+        System.out.println("Memoria utilizada: " + memoryUsed + " bytes");
+
     }
 
     public void mostUsedHashTagForDay(Date date) {
+
+        long timeStart, timeEnd;
+        timeStart = System.currentTimeMillis();
+
+        MemoryMXBean memoryBean = ManagementFactory.getMemoryMXBean();
+        MemoryUsage memoryUsage = memoryBean.getHeapMemoryUsage();
+        long memoryUsed = memoryUsage.getUsed();
+
         int size = this.hashTags.size();
         HashEntry<KeyHashTag, HashTag>[] tempList = this.hashTags.getValues();
         HeapEntry<HashTag>[] list = new HeapEntry[size];
@@ -376,9 +412,22 @@ public class BettingHouse {
                 hashTagFound = true;
             }
         }
+
+        timeEnd = System.currentTimeMillis();
+        System.out.println("Tiempo de ejecucion de la consulta: "+ ( timeEnd - timeStart ) +" milisegundos");
+        System.out.println("Memoria utilizada: " + memoryUsed + " bytes");
+
     }
 
     public void top15UsersWithMoreTweets() {
+
+        long timeStart, timeEnd;
+        timeStart = System.currentTimeMillis();
+
+        MemoryMXBean memoryBean = ManagementFactory.getMemoryMXBean();
+        MemoryUsage memoryUsage = memoryBean.getHeapMemoryUsage();
+        long memoryUsed = memoryUsage.getUsed();
+
         int size = this.users.size();
         HashEntry<KeyUser, User>[] tempList = this.users.getValues();
         HeapEntry<User>[] list = new HeapEntry[size];
@@ -401,9 +450,22 @@ public class BettingHouse {
                 System.out.println("    Usuario verificado: " + temp.getValue().isUserVerified());
             }
         }
+
+        timeEnd = System.currentTimeMillis();
+        System.out.println("Tiempo de ejecucion de la consulta: "+ (timeEnd - timeStart) +" milisegundos");
+        System.out.println("Memoria utilizada: " + memoryUsed + " bytes");
+
     }
 
     public void top7UsersWithMoreFavorites() {
+
+        long timeStart, timeEnd;
+        timeStart = System.currentTimeMillis();
+
+        MemoryMXBean memoryBean = ManagementFactory.getMemoryMXBean();
+        MemoryUsage memoryUsage = memoryBean.getHeapMemoryUsage();
+        long memoryUsed = memoryUsage.getUsed();
+
         int size = this.users.size();
         HashEntry<KeyUser, User>[] tempList = this.users.getValues();
         HeapEntry<User>[] list = new HeapEntry[size];
@@ -425,9 +487,22 @@ public class BettingHouse {
                 System.out.println("    Cantidad de favoritos: " + temp.getValue().getFavourites());
             }
         }
+
+        timeEnd = System.currentTimeMillis();
+        System.out.println("Tiempo de ejecucion de la consulta: "+ (timeEnd - timeStart) +" milisegundos");
+        System.out.println("Memoria utilizada: " + memoryUsed + " bytes");
+
     }
 
     public void tweetsWithSpecificContent(String content) {
+
+        long timeStart, timeEnd;
+        timeStart = System.currentTimeMillis();
+
+        MemoryMXBean memoryBean = ManagementFactory.getMemoryMXBean();
+        MemoryUsage memoryUsage = memoryBean.getHeapMemoryUsage();
+        long memoryUsed = memoryUsage.getUsed();
+
         int count = 0;
         Pattern pattern = Pattern.compile(Pattern.quote(content), Pattern.CASE_INSENSITIVE);
         HashEntry<Long, Tweet>[] tempList = this.tweets.getValues();
@@ -438,6 +513,10 @@ public class BettingHouse {
             }
         }
         System.out.println("Cantidad de tweets con la palabra " + content + ": " + count);
+
+        timeEnd = System.currentTimeMillis();
+        System.out.println("Tiempo de ejecucion de la consulta: "+ (timeEnd - timeStart) +" milisegundos");
+        System.out.println("Memoria utilizada: " + memoryUsed + " bytes");
     }
 
     public MyList<Driver> getDrivers() {

@@ -5,6 +5,9 @@ import obligatorio.entities.HashTag;
 import obligatorio.keys.KeyHashTag;
 import uy.edu.um.prog2.adt.hash.HashEntry;
 
+import java.lang.management.ManagementFactory;
+import java.lang.management.MemoryMXBean;
+import java.lang.management.MemoryUsage;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -49,9 +52,20 @@ public class Principal {
 
             while (!exit) {
                 if (option == 1) {
+                    long timeStart, timeEnd;
+                    timeStart = System.currentTimeMillis();
+
+                    MemoryMXBean memoryBean = ManagementFactory.getMemoryMXBean();
+                    MemoryUsage memoryUsage = memoryBean.getHeapMemoryUsage();
+                    long memoryUsed = memoryUsage.getUsed();
+
                     System.out.println("Carga de datos seleccionada");
                     bettingHouse.loadDriversData();
                     bettingHouse.loadTwitterData();
+                    timeEnd = System.currentTimeMillis();
+                    System.out.println("Carga de datos exitosa, tiempo de ejecucion de carga: "+ (timeEnd -
+                            timeStart) +" milisegundos");
+                    System.out.println("Memoria utilizada: " + memoryUsed + " bytes");
                     exit = true;
                     dataLoaded = true;
 

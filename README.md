@@ -13,3 +13,6 @@ en los campos del archivo.csv que, si bien los mismos son atrapados por las Exce
 En otras palabras: cuando las consultas son realizadas a partir del archivo "f1_dataset_test_test.csv" se verifican resultados
 correctos de las consultas al contrastarlos con la fuente de datos. No sucede lo mismo al ser la fuente el archivo
 "f1_dataset_test.csv".
+
+*- Se incorpora al código las métricas para el tiempo de ejecución de las consultas y carga de datos así como también
+la cantidad de memoria ram utilizada por cada una de ellas.
