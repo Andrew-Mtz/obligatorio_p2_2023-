@@ -3,6 +3,7 @@ package obligatorio.entities;
 import uy.edu.um.prog2.adt.lista.ListaEnlazada;
 import uy.edu.um.prog2.adt.lista.MyList;
 
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.Objects;
 

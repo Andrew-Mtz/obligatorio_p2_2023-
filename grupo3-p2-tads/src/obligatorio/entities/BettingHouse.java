@@ -154,8 +154,15 @@ public class BettingHouse {
                             .split(",");
 
                     boolean isRetweet = Boolean.parseBoolean(line[13]);
+
+                    // CSV tiene error en algunos campos fechas. Aparece tanto en formato
+                    //   "yyyy-MM-dd HH:mm:ss"   como     "yyyy-MM-dd H:mm:ss"
+                    // Es por ello que al correr la consulta 2  para el archivo   .test
+                    // el usuario F1reader aparece 139 veces en lugar de 974.
+
                     SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
                     Date date = formatter.parse(line[9]);
+
                     long tweetId = Long.parseLong(line[0]);
                     String content = line[10];
                     String source = line[12];
@@ -414,6 +421,8 @@ public class BettingHouse {
         for (int i = 1; i <= 10; i++) {
             // Extraigo el elemento de la raíz
             HeapEntry<Driver> temp = heapQuery.deleteAndReturn();
+
+            // Si no hay mas de 10 elementos, el delete del heap retorna null, por lo tanto no podria imprimir
             if (temp != null) {
                 System.out.println("Nombre de piloto: " + temp.getValue().getName() + " " + temp.getValue().getLastName());
                 System.out.println("Cantidad de ocurrencias: " + temp.getKey());
@@ -499,6 +508,8 @@ public class BettingHouse {
 
     public void top15UsersWithMoreTweets() {
 
+
+        // Inciamos el reloj del tiempo y el contador de utilización de memoria RAM.
         long timeStart, timeEnd;
         timeStart = System.currentTimeMillis();
 
@@ -507,21 +518,39 @@ public class BettingHouse {
 
 
         int size = this.users.size();
+
+        // Array que contiene TODOS los elementos del tipo HashEntry que se encuentran en el HashMap
         HashEntry<KeyUser, User>[] tempList = this.users.getValues();
+
+        // Lista vacía con el mismo tamaño del HashMap de hasTags que utilizaré a continuación para
+        // crear un heap vacío donde almacenaré objetos del tipo "HeapEntry" que a su vez contendrán objetos
+        // de la clase User y se comportará como un heapMax.
         HeapEntry<User>[] list = new HeapEntry[size];
         MyHeap<HeapEntry<User>> heapQuery = new MyHeapImpl<>(list, true);
 
+        // Itero sobre cada elemento del array que contiene los objetos HashEntry de User
         for (int i = 1; i < tempList.length; i++) {
             if (tempList[i] != null) {
+                // Accedo al valor del elemento HashEntry en la posición "i", que será el propio objeto
+                // de la clase User
                 User temp = tempList[i].getValue();
-                HeapEntry<User> node = new HeapEntry<>(temp.getUserTweets().getSize(), temp);  // key del heap para ordenar es cantidad de tweets
+                // Creo un objeto HeapEntry cuyo "key" será el tamaño de la lista de tweets asociada a
+                // ESA instancia de la clase User y el "value" será el objeto/instancia de User
+                HeapEntry<User> node = new HeapEntry<>(temp.getUserTweets().getSize(), temp);
+                // Inserto la instancia de HeapEntry creada anteriormente y llamada "nodo" al heapMax (llamado
+                // heapQuery).
                 heapQuery.insert(node);
             }
         }
 
+        // Para los primeros 15 elementos (raices) del heap:
         for (int i = 1; i <= 15; i++){
+            // Extraigo el elemento que se encuentra en la raiz y lo elimino, lo que llevará a que se recomponga
+            // el heap con un nuevo elemento máximo en la raíz.
             HeapEntry<User> temp = heapQuery.deleteAndReturn();
-            if(temp != null) { // Si no hay mas de 15 tweets, el delete del heap retorna null, por lo tanto no podria imprimir, por eso revisamos esto
+
+            // Si no hay mas de 15 elementos, el delete del heap retorna null, por lo tanto no podria imprimir.
+            if(temp != null) {
                 System.out.println("Posicion: " + i);
                 System.out.println("    Nombre de usuario: " + temp.getValue().getUserName());
                 System.out.println("    Cantidad de tweets: " + temp.getValue().getUserTweets().getSize());
@@ -539,6 +568,7 @@ public class BettingHouse {
 
     public void top7UsersWithMoreFavorites() {
 
+        // Inciamos el reloj del tiempo y el contador de utilización de memoria RAM.
         long timeStart, timeEnd;
         timeStart = System.currentTimeMillis();
 
@@ -547,20 +577,37 @@ public class BettingHouse {
 
 
         int size = this.users.size();
+
+        // Array que contiene TODOS los elementos del tipo HashEntry que se encuentran en el HashMap
         HashEntry<KeyUser, User>[] tempList = this.users.getValues();
+
+        // Lista vacía con el mismo tamaño del HashMap de hasTags que utilizaré a continuación para
+        // crear un heap vacío donde almacenaré objetos del tipo "HeapEntry" que a su vez contendrán objetos
+        // de la clase User y se comportará como un heapMax.
         HeapEntry<User>[] list = new HeapEntry[size];
         MyHeap<HeapEntry<User>> heapQuery = new MyHeapImpl<>(list, true);
 
+        // Itero sobre cada elemento del array que contiene los objetos HashEntry de User
         for (int i = 1; i < tempList.length; i++) {
             if (tempList[i] != null) {
+                // Accedo al valor del elemento HashEntry en la posición "i", que será el propio objeto
+                // de la clase User
                 User temp = tempList[i].getValue();
-                HeapEntry<User> node = new HeapEntry<>(temp.getFavourites(), temp);  // key del heap para ordenar es cantidad de favoritos
+                // Creo un objeto HeapEntry cuyo "key" será el tamaño de la lista de tweets asociada a
+                // ESA instancia de la clase User y el "value" será el objeto/instancia de User
+                HeapEntry<User> node = new HeapEntry<>(temp.getFavourites(), temp);
+                // Inserto la instancia de HeapEntry creada anteriormente y llamada "nodo" al heapMax (llamado
+                // heapQuery).
                 heapQuery.insert(node);
             }
         }
 
+        // Para los primeros 7 elementos (raices) del heap:
         for (int i = 1; i <= 7; i++){
+            // Extraigo el elemento que se encuentra en la raiz y lo elimino, lo que llevará a que se recomponga
+            // el heap con un nuevo elemento máximo en la raíz.
             HeapEntry<User> temp = heapQuery.deleteAndReturn();
+            // Si no hay mas de 7 elementos, el delete del heap retorna null, por lo tanto no podria imprimir.
             if(temp != null) {
                 System.out.println("Posicion: " + i);
                 System.out.println("    Nombre de usuario: " + temp.getValue().getUserName());
@@ -576,7 +623,7 @@ public class BettingHouse {
 
     }
 
-
+// ---------------------************* IMPORTANTE!!!!!!!!!!!!! ************---------------------
 
     // ESTA FUNCION ES LA QUE NO ESTÁ TERMINADA!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     // REVISAR!!!!!!!!!!!!!!!!!!!!!

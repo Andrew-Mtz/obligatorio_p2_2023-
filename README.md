@@ -19,3 +19,14 @@ correctos de las consultas al contrastarlos con la fuente de datos. No sucede lo
 la cantidad de memoria ram utilizada por cada una de ellas.
 
 *- Se avanza en agregar los comentarios explicando el código.
+
+
+-------------------------*********  08-Jun-2023 *********------------------------------
+
+*- Se terminan de comentar/explicar el código de las funciones
+
+*- Se detecta que el archivo "f1_dataset_test.csv" tiene un problema en el campo fecha: algunas veces aparece en formato
+  "yyyy-mm-dd HH:mm:ss"  y  otras veces aparece en formato "yyyy-mm-dd H:mm:ss".  Se intenta corregir de varias maneras,
+  NO TENIENDO ÉXITO ninguno de los intentos desarrollados. Al ejecutar la consulta 2 con el archivo "f1_dataset_test.csv"
+  el resultado que se observa es  F1reader con 139 apariciones, cuando lo correcto sería que ese mismo usuario tuviera
+  974 apariciones.
