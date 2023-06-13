@@ -4,7 +4,7 @@ import uy.edu.um.prog2.adt.exceptions.EmptyStackException;
 
 import uy.edu.um.prog2.adt.lista.Nodo;
 
-public class MyStackImpl<T> implements MyStack<T> {
+public class  MyStackImpl<T> implements MyStack<T> {
 
     private Nodo primero;
     private Nodo ultimo;
