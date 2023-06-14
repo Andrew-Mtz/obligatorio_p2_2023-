@@ -29,7 +29,7 @@ public class BettingHouse {
 // ----------------------------***********************************------------------------------
 
     // Declaro las Variables de Instancia de la clase BettingHouse.
-    private static final String F1_DATASET = "f1_dataset.csv";
+    private static final String F1_DATASET = "f1_dataset_test.csv";
     private static final String DRIVERS_DATASET = "drivers.txt";
 
     private MyList<Driver> drivers;
@@ -200,6 +200,7 @@ public class BettingHouse {
 
                         // Se actualiza la lista de "favoritos" asociado a la instancia de Usuario (userTemp).
                         userTemp.updateUserFavorites(favorites);
+
 
                         // Creo la instancia de la clase Tweet utilizando la información que extraje del
                         // archivo CSV

@@ -61,7 +61,10 @@ public class User implements Comparable {
     }
 
     public void updateUserFavorites(float number) {
-        this.favourites += number;
+
+        if (number > this.favourites) {
+            this.favourites = number;
+        }
     }
 
     // Getter & Setter
