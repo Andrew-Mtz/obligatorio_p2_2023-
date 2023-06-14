@@ -30,3 +30,18 @@ la cantidad de memoria ram utilizada por cada una de ellas.
   NO TENIENDO ÉXITO ninguno de los intentos desarrollados. Al ejecutar la consulta 2 con el archivo "f1_dataset_test.csv"
   el resultado que se observa es  F1reader con 139 apariciones, cuando lo correcto sería que ese mismo usuario tuviera
   974 apariciones.
+  
+  
+  -------------------------*********  14-Jun-2023 *********------------------------------
+  
+  *- Se corrige parte de la función número 5 para que el número de favoritos para cada usuario sea el mayor que existe
+  y no la suma de todos ellos (ya es un número acumulativo en el archivo.csv).
+  
+  
+  
+  
+  
+  
+  
+  
+  
