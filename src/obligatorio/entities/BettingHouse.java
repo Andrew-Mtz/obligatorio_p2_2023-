@@ -21,16 +21,18 @@ import java.lang.management.MemoryMXBean;
 import java.lang.management.MemoryUsage;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
 public class BettingHouse {
 
+    private static final Logger logger = Logger.getLogger(BettingHouse.class.getName());
 
 // ----------------------------***********************************------------------------------
 
     // Declaro las Variables de Instancia de la clase BettingHouse.
-    private static final String F1_DATASET = "f1_dataset_test.csv";
-    private static final String DRIVERS_DATASET = "drivers.txt";
+    private static final String F1_DATASET = "C:\\Users\\andyc\\Desktop\\UM\\Prog\\obligatorio\\obligatorio_p2_2023-\\f1_dataset_test_test.csv";
+    private static final String DRIVERS_DATASET = "C:\\Users\\andyc\\Desktop\\UM\\Prog\\obligatorio\\obligatorio_p2_2023-\\drivers.txt";
 
     private MyList<Driver> drivers;
 
@@ -388,20 +390,22 @@ public class BettingHouse {
         // clase "Driver") que son cargados a través del array "list". El heap se comporta como un HeapMax.
         // Por ahora el heap llamado  "heapQuery" se ha creado vacío teniendo por insumo un array con lenght = 20
         MyHeap<HeapEntry<Driver>> heapQuery = new MyHeapImpl<>(list, true);
-
         // Itero sobre la ListaEnlazada de "drivers" de la clase BettingHouse
         for (Driver driver : this.drivers) {
-
+            int count = 0;
             // Itero sobre el array de objetos HashEnty de tweets
             for (int i = 1; i < tempList.length; i++) {
                 if (tempList[i] != null) {
-                    int count = 0;
                     // Accedo al objeto de la clase Tweet contenido en la instancia de la clase HashEntry
                     Tweet temp = tempList[i].getValue();
+
+                    System.out.println(String.valueOf("fecha ingresada"+date));
+                    System.out.println(String.valueOf("fecha tweet" + temp.getDate()));
                     // Si las fechas asociadas a ese tweet coinciden con la ingresada por el usuario
                     if (temp.getDate().equals(date)) {
                         // Verificamos si el nombre o el apellido del piloto aparece en el contenido del tweet.
                         if (temp.getContent().contains(driver.getName()) || temp.getContent().contains(driver.getLastName())) {
+                            System.out.println("ENTRO");
                             // Si aparece, acumulamos +1 en el contador asociado a ESE driver en particular
                             // Este count será la "key" con la cual se ordenan los objetos en el heapMax
                             count += 1;
@@ -411,7 +415,15 @@ public class BettingHouse {
                     // el contenido de todos los tweet para una fecha determinada, se agrega dicha instancia de
                     // "driver" asociada a la "key = cantidad de veces que fue nombrado" al heapMax.
                     HeapEntry<Driver> node = new HeapEntry<>(count, driver);
-                    heapQuery.insert(node);
+                    if (heapQuery.size() == 20) {
+                        // El heap está lleno
+                    }else {
+                        heapQuery.insert(node);
+                        // Si el heap está lleno, puedes decidir qué hacer con los elementos que no caben.
+                        // Por ejemplo, podrías ignorarlos o reemplazar el menor de los elementos actuales si el nuevo es mayor.
+                        // Aquí un ejemplo de ignorar los elementos adicionales.
+                        break;
+                    }
                 }
             }
         }
