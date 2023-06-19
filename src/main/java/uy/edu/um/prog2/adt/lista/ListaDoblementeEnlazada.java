@@ -151,4 +151,9 @@ public class ListaDoblementeEnlazada<T> implements MyList<T> {
     public boolean contains(T value) {
         return false;
     }
+
+    @Override
+    public Nodo<T> getObject(T value) {
+        return null;
+    }
 }

@@ -59,28 +59,30 @@ public class ListaEnlazada<T> implements MyList<T> {
         size=size-1;
     }
 
-    public void removePorValue (T valor){
+    public void removePorValue(T valor) {
         Nodo<T> anterior = null;
         Nodo<T> temp = primero;
-        for(int i = 0; i < size; i++){
-            if (valor.equals(temp.getValor())){
-                if(temp.equals(primero)){
-                        remove(0);
-                } else{
-                    if(size > 2) {
-                        anterior.setSiguiente(temp.getSiguiente());
-                    } else{
-                        anterior.setSiguiente(null);
+        while (temp != null) {
+            if (valor.equals(temp.getValor())) {
+                if (temp.equals(primero)) {
+                    primero = temp.getSiguiente();
+                    if (primero == null) {
+                        ultimo = null;
+                    }
+                } else {
+                    anterior.setSiguiente(temp.getSiguiente());
+                    if (temp.equals(ultimo)) {
                         ultimo = anterior;
                     }
-                    size--;
                 }
+                size--;
+                return; // Exit the method after removing the value
             }
             anterior = temp;
             temp = temp.getSiguiente();
-
         }
     }
+
 
     public int getSize(){
         return this.size;
@@ -218,5 +220,17 @@ public class ListaEnlazada<T> implements MyList<T> {
     public Iterator<T> iterator() {
         return new MyIteratorListaEnlazada<>(primero);
     }
+
+    public Nodo<T> getObject(T value) {
+        Nodo<T> temp = primero;
+        while (temp != null) {
+            if (temp.getValor().equals(value)) {
+                return temp;
+            }
+            temp = temp.getSiguiente();
+        }
+        return null; // Si no se encuentra el valor en la lista
+    }
+
 
 }

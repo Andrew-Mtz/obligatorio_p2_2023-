@@ -1,4 +1,5 @@
 package uy.edu.um.prog2.adt.hash;
+
 import uy.edu.um.prog2.adt.lista.ListaEnlazada;
 import uy.edu.um.prog2.adt.lista.MyList;
 
@@ -135,4 +136,21 @@ public class MyOpenHashImpl<K, V> implements MyHash<K, V> {
         }
         return esPrimo;
     }
+
+    @Override
+    public boolean containsKey(K key) {
+        int position = key.hashCode() % entryArray.length;
+        MyList<HashEntry<K, V>> listForPosition = entryArray[position];
+
+        if (listForPosition != null) {
+            for (HashEntry<K, V> tempEntry : listForPosition) {
+                if (tempEntry.getKey().equals(key)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
 }

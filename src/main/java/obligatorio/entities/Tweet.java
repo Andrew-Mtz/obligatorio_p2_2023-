@@ -1,10 +1,7 @@
 package obligatorio.entities;
 
 import uy.edu.um.prog2.adt.lista.ListaEnlazada;
-import uy.edu.um.prog2.adt.lista.MyList;
 
-import java.time.LocalDate;
-import java.util.Date;
 import java.util.Objects;
 
 public class Tweet {
@@ -16,13 +13,13 @@ public class Tweet {
     private String source;
     private boolean isRetweet;
     private User user;
-    private Date date;
-    private MyList<HashTag> hashTagsOfThisTweet = new ListaEnlazada<>();
+    private String date;
+    private ListaEnlazada<HashTag> hashTagsOfThisTweet = new ListaEnlazada<>();
 
 
     // Declaro los constructores de la clase.
 
-    public Tweet(long idTweet, String content, String source, boolean isRetweet, User user, Date date) {
+    public Tweet(long idTweet, String content, String source, boolean isRetweet, User user, String date) {
         this.idTweet = idTweet;
         this.content = content;
         this.source = source;
@@ -88,11 +85,11 @@ public class Tweet {
         isRetweet = retweet;
     }
 
-    public MyList<HashTag> getHashTagsOfThisTweet() {
+    public ListaEnlazada<HashTag> getHashTagsOfThisTweet() {
         return hashTagsOfThisTweet;
     }
 
-    public void setHashTagsOfThisTweet(MyList<HashTag> hashTagsOfThisTweet) {
+    public void setHashTagsOfThisTweet(ListaEnlazada<HashTag> hashTagsOfThisTweet) {
         this.hashTagsOfThisTweet = hashTagsOfThisTweet;
     }
 
@@ -104,11 +101,11 @@ public class Tweet {
         this.user = user;
     }
 
-    public Date getDate() {
+    public String getDate() {
         return date;
     }
 
-    public void setDate(Date date) {
+    public void setDate(String date) {
         this.date = date;
     }
 }

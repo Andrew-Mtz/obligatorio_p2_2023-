@@ -146,4 +146,21 @@ public class MyCloseHashImpl<K,V> implements MyHash<K,V> {
         }
         return esPrimo;
     }
+
+    @Override
+    public boolean containsKey(K key) {
+        int iterations = 0;
+        int position = getPosition(key, iterations);
+
+        while (!(hashArray[position] == null || iterations > hashArray.length || hashArray[position].isDeleted())) {
+            if (hashArray[position].getKey().equals(key)) {
+                return true;
+            } else {
+                iterations++;
+                position = getPosition(key, iterations);
+            }
+        }
+
+        return false;
+    }
 }

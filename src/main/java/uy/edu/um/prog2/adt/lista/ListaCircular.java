@@ -97,6 +97,11 @@ public class ListaCircular<T> implements MyList<T> {
     }
 
     @Override
+    public Nodo<T> getObject(T value) {
+        return null;
+    }
+
+    @Override
     public Iterator<T> iterator() {
         return null;
     }

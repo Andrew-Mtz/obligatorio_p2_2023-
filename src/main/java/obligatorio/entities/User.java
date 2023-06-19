@@ -8,6 +8,7 @@ import java.util.Objects;
 public class User implements Comparable {
 
     // Declaro las variables de instancia de la clase.
+    private static long idCounter = 0;
     private long idUser;
     private String userName;
     private boolean userVerified;
@@ -16,8 +17,8 @@ public class User implements Comparable {
 
 
     // Declaro los constructores de la clase.
-    public User(long idUser, String name, boolean isVerified) {
-        this.idUser = idUser;
+    public User(String name, boolean isVerified) {
+        this.idUser = idCounter++;
         this.userName = name;
         this.userVerified = isVerified;
         this.userTweets = new ListaEnlazada<>();
@@ -25,7 +26,6 @@ public class User implements Comparable {
 
     public User() {
     }
-
 
     // Declaro los métodos de la clase
 
@@ -50,15 +50,11 @@ public class User implements Comparable {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        User user = (User) o;
-        return idUser == user.idUser;
+        if (!(o instanceof User user)) return false;
+        return Objects.equals(getUserName(), user.getUserName());
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(idUser);
-    }
+
 
     public void updateUserFavorites(float number) {
 

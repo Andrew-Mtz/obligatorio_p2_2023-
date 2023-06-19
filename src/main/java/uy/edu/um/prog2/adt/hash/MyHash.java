@@ -14,4 +14,6 @@ public interface MyHash<K, V> {
 
     HashEntry<K,V>[] getValues();
 
+    boolean containsKey(K key);
+
 }

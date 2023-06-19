@@ -27,4 +27,6 @@ public interface MyList<T> extends Iterable<T> {
 
     boolean contains(T value);
 
+    public Nodo<T> getObject(T value);
+
 }
