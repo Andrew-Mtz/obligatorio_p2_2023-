@@ -1,9 +1,6 @@
 package obligatorio;
 
 import obligatorio.entities.BettingHouse;
-import obligatorio.entities.HashTag;
-import obligatorio.keys.KeyHashTag;
-import uy.edu.um.prog2.adt.hash.HashEntry;
 
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryMXBean;

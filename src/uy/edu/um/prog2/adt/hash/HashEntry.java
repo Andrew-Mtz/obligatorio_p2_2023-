@@ -12,6 +12,10 @@ public class HashEntry<K, V> {
         this.deleted = false;
     }
 
+    public HashEntry() {
+
+    }
+
     public K getKey() {
         return key;
     }
