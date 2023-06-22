@@ -19,8 +19,13 @@ import java.io.*;
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryMXBean;
 import java.lang.management.MemoryUsage;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.YearMonth;
+import java.time.format.TextStyle;
 import java.util.Date;
+import java.util.LinkedList;
+import java.util.Locale;
 import java.util.regex.Pattern;
 
 public class BettingHouse {
@@ -141,7 +146,7 @@ public class BettingHouse {
             //  userName (columna 1), usuarioVerificado (columna 8), favoritos (columna 7), hashTags (columna 11),
             //  fueRetweeteado (columna 13), fechaDelTweet (columna 9), idTweet (columna 0),
             //  contenidoDelTweet (columna 10)  y  sourceDelTweet (columna 12).
-            while((line = csvReader.readNext()) != null) {
+            while ((line = csvReader.readNext()) != null) {
                 try {
                     String userName = line[1];
                     boolean isVerified = Boolean.parseBoolean(line[8]);
@@ -248,7 +253,7 @@ public class BettingHouse {
                                     tempHashTagForTweet.add(tempHashTag);
 
                                 } // Si NO encuentra al objeto de la clase HashTag dentro del HashMap de hashtags de la
-                                  // clase BettingHouse:
+                                // clase BettingHouse:
                                 else {
 
                                     // Crea una instancia temporal de la clase HashTag a la cual se le agrega la
@@ -343,7 +348,7 @@ public class BettingHouse {
 
                         // Si en la lista NO se encuentra el texto asociado al HashTag (que es el propio
                         // HashTag, por ejemplo, "F1", "QatarGP") entonces se agrega a la lista.
-                        if (!list.contains(tempList[i].getValue().getText())){
+                        if (!list.contains(tempList[i].getValue().getText())) {
                             list.add(tempList[i].getValue().getText());
                         }
                     }
@@ -353,7 +358,7 @@ public class BettingHouse {
         System.out.println("Cantidad de hashTags distintos para el día: " + list.getSize());
 
         timeEnd = System.currentTimeMillis();
-        System.out.println("Tiempo de ejecucion de la consulta: "+ ( timeEnd - timeStart ) +" milisegundos");
+        System.out.println("Tiempo de ejecucion de la consulta: " + (timeEnd - timeStart) + " milisegundos");
 
         long memoryUsed = memoryUsage.getUsed();
         System.out.println("Memoria utilizada: " + memoryUsed + " bytes");
@@ -364,7 +369,7 @@ public class BettingHouse {
     // ----------------------------***********************************------------------------------
 
 
-    public void top10Drivers(Date date) {
+    public void top10Drivers(String date) throws ParseException {
 
         // Inciamos el reloj del tiempo y el contador de utilización de memoria RAM.
         long timeStart, timeEnd;
@@ -378,39 +383,65 @@ public class BettingHouse {
         // con un "key" y un "value", donde en este caso la "key" es el resultado de pasar el id del
         // hashTag por la HashFunction y el value es el propio objeto de la clase Tweet).
         HashEntry<Long, Tweet>[] tempList = this.tweets.getValues();
-        MyCloseHashImpl<Driver, Integer> mencionesPorPiloto = new MyCloseHashImpl<>( 0,true);
+        MyCloseHashImpl<Driver, Integer> mencionesPorPiloto = new MyCloseHashImpl<>(0, true);
 
         for (HashEntry<Long, Tweet> tweet : tempList) {
-            if (tweet != null && tweet.getValue().getDate().equals(date)) {
-                String contenidoTweet = tweet.getValue().getContent().toLowerCase();
-                for (Driver driver : drivers) {
-                    if (contenidoTweet.contains(driver.getName().toLowerCase()) || contenidoTweet.contains(driver.getLastName().toLowerCase())) {
-                        Integer menciones = mencionesPorPiloto.get(driver);
-                        mencionesPorPiloto.put(driver, menciones != null ? menciones + 1 : 1);
-                        break;
+            if (tweet != null) {
+                Date dateTweet =  tweet.getValue().getDate();
+                SimpleDateFormat sdf = new SimpleDateFormat("E MMM dd HH:mm:ss zzz yyyy");
+
+                // Obtener el mes
+                SimpleDateFormat sdfMes = new SimpleDateFormat("MMMM");
+                String mesTweet = sdfMes.format(dateTweet);
+
+                // Obtener el año
+                SimpleDateFormat sdfAnio = new SimpleDateFormat("yyyy");
+                String anioTweet = sdfAnio.format(dateTweet);
+
+                // Parsear la fecha en formato "yyyy-MM"
+                YearMonth dateAnioMes = YearMonth.parse(date);
+
+                String nombreMes = dateAnioMes.getMonth().getDisplayName(TextStyle.FULL, Locale.getDefault());
+
+                // Obtener el año y el mes
+                String year = String.valueOf(dateAnioMes.getYear());
+
+                if (mesTweet.equals(nombreMes) && anioTweet.equals(year)){
+                    String contenidoTweet = tweet.getValue().getContent().toLowerCase();
+                    for (Driver driver : drivers) {
+                        if (contenidoTweet.contains(driver.getName().toLowerCase()) || contenidoTweet.contains(driver.getLastName().toLowerCase())) {
+                            Integer menciones = mencionesPorPiloto.get(driver);
+                            mencionesPorPiloto.put(driver, menciones != null ? menciones + 1 : 1);
+                        }
                     }
                 }
             }
         }
 
-        HashEntry<Driver, Integer>[] topPilotos = mencionesPorPiloto.getValues();
+        LinkedList<HashEntry<Driver, Integer>> topPilotos = new LinkedList<>();
 
-        int count = 0;
-        for (HashEntry<Driver, Integer> entry : topPilotos) {
+        for (HashEntry<Driver, Integer> entry : mencionesPorPiloto.getValues()) {
             if (entry != null && !entry.isDeleted()) {
-                Driver piloto = entry.getKey();
-                int menciones = entry.getValue();
-                System.out.println("Piloto: " + piloto.getName() + " " + piloto.getLastName() + ", Menciones: " + menciones);
-                count++;
-            }
-            if (count >= 10) {
-                break;
+                topPilotos.add(entry);
             }
         }
 
+        // Ordenar la lista de top pilotos por el número de menciones en orden descendente
+        topPilotos.sort((entry1, entry2) -> entry2.getValue().compareTo(entry1.getValue()));
+
+        int count = 0;
+        for (HashEntry<Driver, Integer> entry : topPilotos) {
+            if (count >= 10) {
+                break;
+            }
+            Driver piloto = entry.getKey();
+            int menciones = entry.getValue();
+            System.out.println("Piloto: " + piloto.getName() + " " + piloto.getLastName() + ", Menciones: " + menciones);
+            count++;
+        }
 
         timeEnd = System.currentTimeMillis();
-        System.out.println("Tiempo de ejecucion de la consulta: "+ ( timeEnd - timeStart ) +" milisegundos");
+        System.out.println("Tiempo de ejecucion de la consulta: " + (timeEnd - timeStart) + " milisegundos");
 
         long memoryUsed = memoryUsage.getUsed();
         System.out.println("Memoria utilizada: " + memoryUsed + " bytes");
@@ -450,7 +481,7 @@ public class BettingHouse {
                     if (dateHashTag.equals(date)) {
                         // Acumulo +1 cada vez que aparece la fecha indicada por el usuario en la lista de fechas
                         // que ESE hashTag en particular tiene asociadas.
-                        count +=1;
+                        count += 1;
                     }
                 }
 
@@ -466,7 +497,7 @@ public class BettingHouse {
         // ordenados de acuerdo a la cantidad de veces que son nombrados dichos hashTags para una
         // fecha particular. El top 10 lo obtenemos extrayendo los elementos de las 10 "raices" del heapMax
         boolean hashTagFound = false;
-        while (!hashTagFound){
+        while (!hashTagFound) {
             HeapEntry<HashTag> temp = heapQuery.deleteAndReturn();
             if (temp != null && (!temp.getValue().getText().equals("f1") && !temp.getValue().getText().equals("F1"))) {
                 System.out.println("HashTag: " + temp.getValue().getText());
@@ -475,7 +506,7 @@ public class BettingHouse {
         }
 
         timeEnd = System.currentTimeMillis();
-        System.out.println("Tiempo de ejecucion de la consulta: "+ ( timeEnd - timeStart ) +" milisegundos");
+        System.out.println("Tiempo de ejecucion de la consulta: " + (timeEnd - timeStart) + " milisegundos");
 
         long memoryUsed = memoryUsage.getUsed();
         System.out.println("Memoria utilizada: " + memoryUsed + " bytes");
@@ -523,13 +554,13 @@ public class BettingHouse {
         }
 
         // Para los primeros 15 elementos (raices) del heap:
-        for (int i = 1; i <= 15; i++){
+        for (int i = 1; i <= 15; i++) {
             // Extraigo el elemento que se encuentra en la raiz y lo elimino, lo que llevará a que se recomponga
             // el heap con un nuevo elemento máximo en la raíz.
             HeapEntry<User> temp = heapQuery.deleteAndReturn();
 
             // Si no hay mas de 15 elementos, el delete del heap retorna null, por lo tanto no podria imprimir.
-            if(temp != null) {
+            if (temp != null) {
                 System.out.println("Posicion: " + i);
                 System.out.println("    Nombre de usuario: " + temp.getValue().getUserName());
                 System.out.println("    Cantidad de tweets: " + temp.getValue().getUserTweets().getSize());
@@ -538,7 +569,7 @@ public class BettingHouse {
         }
 
         timeEnd = System.currentTimeMillis();
-        System.out.println("Tiempo de ejecucion de la consulta: "+ (timeEnd - timeStart) +" milisegundos");
+        System.out.println("Tiempo de ejecucion de la consulta: " + (timeEnd - timeStart) + " milisegundos");
 
         long memoryUsed = memoryUsage.getUsed();
         System.out.println("Memoria utilizada: " + memoryUsed + " bytes");
@@ -582,12 +613,12 @@ public class BettingHouse {
         }
 
         // Para los primeros 7 elementos (raices) del heap:
-        for (int i = 1; i <= 7; i++){
+        for (int i = 1; i <= 7; i++) {
             // Extraigo el elemento que se encuentra en la raiz y lo elimino, lo que llevará a que se recomponga
             // el heap con un nuevo elemento máximo en la raíz.
             HeapEntry<User> temp = heapQuery.deleteAndReturn();
             // Si no hay mas de 7 elementos, el delete del heap retorna null, por lo tanto no podria imprimir.
-            if(temp != null) {
+            if (temp != null) {
                 System.out.println("Posicion: " + i);
                 System.out.println("    Nombre de usuario: " + temp.getValue().getUserName());
                 System.out.println("    Cantidad de favoritos: " + temp.getValue().getFavourites());
@@ -595,7 +626,7 @@ public class BettingHouse {
         }
 
         timeEnd = System.currentTimeMillis();
-        System.out.println("Tiempo de ejecucion de la consulta: "+ (timeEnd - timeStart) +" milisegundos");
+        System.out.println("Tiempo de ejecucion de la consulta: " + (timeEnd - timeStart) + " milisegundos");
 
         long memoryUsed = memoryUsage.getUsed();
         System.out.println("Memoria utilizada: " + memoryUsed + " bytes");
@@ -627,7 +658,7 @@ public class BettingHouse {
         System.out.println("Cantidad de tweets con la palabra " + content + ": " + count);
 
         timeEnd = System.currentTimeMillis();
-        System.out.println("Tiempo de ejecucion de la consulta: "+ (timeEnd - timeStart) +" milisegundos");
+        System.out.println("Tiempo de ejecucion de la consulta: " + (timeEnd - timeStart) + " milisegundos");
 
         long memoryUsed = memoryUsage.getUsed();
         System.out.println("Memoria utilizada: " + memoryUsed + " bytes");

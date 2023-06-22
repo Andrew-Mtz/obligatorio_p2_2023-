@@ -108,13 +108,13 @@ public class Principal {
                                 if (optionQuery == 1) {
                                     boolean dateIsCorrect = false;
                                     while (!dateIsCorrect) {
-                                        System.out.println("Ingresar la fecha en formato YYYY-MM-DD");
+                                        System.out.println("Ingresar la fecha en formato YYYY-MM");
                                         Scanner userDateInput = new Scanner(System.in);
                                         String date = userDateInput.next();
-                                        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+                                        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM");
                                         try {
                                             Date queryDate = formatter.parse(date);
-                                            bettingHouse.top10Drivers(queryDate);
+                                            bettingHouse.top10Drivers(date);
                                             dateIsCorrect = true;
 
                                         } catch (ParseException e) {
