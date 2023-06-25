@@ -38,10 +38,10 @@ public class BettingHouse {
     private static final String currentDirectory = System.getProperty("user.dir");
 
     // Concatenar la ruta actual con el nombre del archivo
-    private static final String F1_DATA = currentDirectory+ "\\obligatorio_p2_2023-\\" + F1_DATASET;
+    private static final String F1_DATA = currentDirectory+ "\\" + F1_DATASET;
     private static final String DRIVERS_DATASET = "drivers.txt";
 
-    private static final String DRIVERS = currentDirectory + "\\obligatorio_p2_2023-\\" + DRIVERS_DATASET;
+    private static final String DRIVERS = currentDirectory + "\\" + DRIVERS_DATASET;
 
     private MyList<Driver> drivers;
 
