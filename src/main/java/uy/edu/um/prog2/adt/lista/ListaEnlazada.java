@@ -232,5 +232,15 @@ public class ListaEnlazada<T> implements MyList<T> {
         return null; // Si no se encuentra el valor en la lista
     }
 
+    public ListaEnlazada<T> sort() {
+        ListaEnlazada<T> sortedList = new ListaEnlazada<>();
+        Nodo<T> temp = primero;
+        while (temp != null) {
+            sortedList.agregarAscendente(temp.getValor());
+            temp = temp.getSiguiente();
+        }
+        return sortedList;
+    }
+
 
 }

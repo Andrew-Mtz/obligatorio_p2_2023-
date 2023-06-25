@@ -17,12 +17,12 @@ public class MyOpenHashImpl<K, V> implements MyHash<K, V> {
 
     @Override
     public void put(K k, V v) {
-
-        if (((float) this.size + 1) / ((float) entryArray.length) > 0.75 ){
+        if (((float) this.size + 1) / ((float) entryArray.length) > 0.75) {
             this.reHashing();
         }
 
-        int position = k.hashCode() % entryArray.length;
+        int hashCode = k.hashCode();
+        int position = (hashCode >= 0 ? hashCode : -hashCode) % entryArray.length;
         MyList<HashEntry<K, V>> listForPosition = entryArray[position];
 
         if (listForPosition == null) {
@@ -43,12 +43,12 @@ public class MyOpenHashImpl<K, V> implements MyHash<K, V> {
         if (searchElement != null) {
             searchElement.setValue(v);
         } else {
-
             HashEntry<K, V> hashEntry = new HashEntry<>(k, v);
             listForPosition.add(hashEntry);
             size++;
         }
     }
+
 
     @Override
     public void remove (K key){

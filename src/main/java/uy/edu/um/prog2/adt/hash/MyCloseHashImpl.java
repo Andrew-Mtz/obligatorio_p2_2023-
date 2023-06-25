@@ -12,6 +12,10 @@ public class MyCloseHashImpl<K,V> implements MyHash<K,V> {
         this.size = 0;
     }
 
+    public MyCloseHashImpl(boolean linear) {
+        this.linear = linear;
+    }
+
     @Override
     public void put(K k, V v) {
 
