@@ -7,6 +7,8 @@ import java.lang.management.MemoryMXBean;
 import java.lang.management.MemoryUsage;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.YearMonth;
+import java.time.format.DateTimeParseException;
 import java.util.Date;
 import java.util.InputMismatchException;
 import java.util.Scanner;
@@ -113,11 +115,12 @@ public class Principal {
                                         String date = userDateInput.next();
                                         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM");
                                         try {
-                                            Date queryDate = formatter.parse(date);
-                                            bettingHouse.top10Drivers(date);
+                                            // Parsear la fecha en formato "yyyy-MM"
+                                            YearMonth dateAnioMes = YearMonth.parse(date);
+                                            bettingHouse.top10Drivers(dateAnioMes);
                                             dateIsCorrect = true;
 
-                                        } catch (ParseException e) {
+                                        } catch (DateTimeParseException e) {
                                             System.out.println("Debe ingresar la fecha en el formato correcto");
                                         }
                                     }

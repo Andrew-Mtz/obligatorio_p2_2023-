@@ -19,9 +19,9 @@ import java.io.*;
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryMXBean;
 import java.lang.management.MemoryUsage;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.YearMonth;
+import java.time.format.DateTimeParseException;
 import java.time.format.TextStyle;
 import java.util.Date;
 import java.util.LinkedList;
@@ -34,8 +34,14 @@ public class BettingHouse {
 // ----------------------------***********************************------------------------------
 
     // Declaro las Variables de Instancia de la clase BettingHouse.
-    private static final String F1_DATASET = "C:\\Users\\andmartinez\\Desktop\\UM\\Programacion\\obligatorio-pt2\\obligatorio_p2_2023-\\f1_dataset_test_test.csv";
-    private static final String DRIVERS_DATASET = "C:\\Users\\andmartinez\\Desktop\\UM\\Programacion\\obligatorio-pt2\\obligatorio_p2_2023-\\drivers.txt";
+    private static final String F1_DATASET = "f1_dataset_test_test.csv";
+    private static final String currentDirectory = System.getProperty("user.dir");
+
+    // Concatenar la ruta actual con el nombre del archivo
+    private static final String F1_DATA = currentDirectory+ "\\obligatorio_p2_2023-\\" + F1_DATASET;
+    private static final String DRIVERS_DATASET = "drivers.txt";
+
+    private static final String DRIVERS = currentDirectory + "\\obligatorio_p2_2023-\\" + DRIVERS_DATASET;
 
     private MyList<Driver> drivers;
 
@@ -82,7 +88,7 @@ public class BettingHouse {
 
     public void loadDriversData() {
         try {
-            File file = new File(DRIVERS_DATASET);
+            File file = new File(DRIVERS);
             FileReader fileReader = new FileReader(file);
             BufferedReader bufferedReader = new BufferedReader(fileReader);
             String line;
@@ -134,7 +140,7 @@ public class BettingHouse {
         // una coma separadora y no una que legítimamente pertenece a la información relevante que contiene
         // el archivo.
         try (
-                CSVReader csvReader = new CSVReaderBuilder(new FileReader(F1_DATASET))
+                CSVReader csvReader = new CSVReaderBuilder(new FileReader(F1_DATA))
                         .withCSVParser(new CSVParserBuilder().withSeparator(',').build())
                         .build()
         ) {
@@ -369,7 +375,7 @@ public class BettingHouse {
     // ----------------------------***********************************------------------------------
 
 
-    public void top10Drivers(String date) throws ParseException {
+    public void top10Drivers(YearMonth date) throws DateTimeParseException {
 
         // Inciamos el reloj del tiempo y el contador de utilización de memoria RAM.
         long timeStart, timeEnd;
@@ -388,23 +394,18 @@ public class BettingHouse {
         for (HashEntry<Long, Tweet> tweet : tempList) {
             if (tweet != null) {
                 Date dateTweet =  tweet.getValue().getDate();
-                SimpleDateFormat sdf = new SimpleDateFormat("E MMM dd HH:mm:ss zzz yyyy");
 
                 // Obtener el mes
-                SimpleDateFormat sdfMes = new SimpleDateFormat("MMMM");
+                SimpleDateFormat sdfMes = new SimpleDateFormat("MMMM", Locale.ENGLISH);
                 String mesTweet = sdfMes.format(dateTweet);
 
                 // Obtener el año
                 SimpleDateFormat sdfAnio = new SimpleDateFormat("yyyy");
                 String anioTweet = sdfAnio.format(dateTweet);
 
-                // Parsear la fecha en formato "yyyy-MM"
-                YearMonth dateAnioMes = YearMonth.parse(date);
-
-                String nombreMes = dateAnioMes.getMonth().getDisplayName(TextStyle.FULL, Locale.getDefault());
-
                 // Obtener el año y el mes
-                String year = String.valueOf(dateAnioMes.getYear());
+                String nombreMes = date.getMonth().getDisplayName(TextStyle.FULL, Locale.ENGLISH);
+                String year = String.valueOf(date.getYear());
 
                 if (mesTweet.equals(nombreMes) && anioTweet.equals(year)){
                     String contenidoTweet = tweet.getValue().getContent().toLowerCase();
