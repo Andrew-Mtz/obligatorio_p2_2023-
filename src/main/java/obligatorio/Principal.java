@@ -121,7 +121,7 @@ public class Principal {
 
                                     MemoryMXBean memoryBean = ManagementFactory.getMemoryMXBean();
                                     MemoryUsage memoryUsage = memoryBean.getHeapMemoryUsage();
-                                    bettingHouse.top15UsersWithTheMostTweetsFaster();
+                                    bettingHouse.top15UsersWithTheMostTweets();
 
                                     timeEnd = System.currentTimeMillis();
                                     System.out.println("Tiempo consumido: " + (timeEnd - timeStart) +" milisegundos");

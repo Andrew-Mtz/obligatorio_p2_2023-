@@ -25,7 +25,8 @@ public class BettingHouse {
 // ----------------------------***********************************------------------------------
 
     // Declaro las Variables de Instancia de la clase BettingHouse.
-    private static final String F1_DATASET = "C:\\Users\\Usuario\\Downloads\\obligatorio2023 (1)\\f1_dataset_test.csv";
+    //private static final String F1_DATASET = "C:\\Users\\Usuario\\Downloads\\obligatorio2023 (1)\\f1_dataset_test.csv";
+    private static final String F1_DATASET = "C:\\Users\\Usuario\\Downloads\\f1_dataset_test_test.csv";
     private static final String DRIVERS_DATASET = "drivers.txt";
     private final ListaEnlazada<Driver> drivers;
 
@@ -185,23 +186,6 @@ public class BettingHouse {
         for (int i = 0; i < 15 && !queue.isEmpty(); i++) {
             User user = queue.dequeue();
             System.out.println(user.getUserName() + " tiene " + user.getUserTweets().getSize() + " tweets. Verificado?: " + user.isUserVerified());
-        }
-    }
-
-    // Top 15 usuarios con más tweets (más rápido)
-    public void top15UsersWithTheMostTweetsFaster() throws EmptyQueueException {
-        MyPriorityQueue<User> queue = new MyPriorityQueueImpl<>();
-
-        for (int i = 0; i < users.getSize(); i++) {
-            User user = users.get(i);
-            int tweetSize = user.getUserTweets().getSize();
-            queue.enqueueWithPriority(user, tweetSize);
-        }
-
-        int count = Math.min(15, queue.getSize());
-        for (int i = 0; i < count; i++) {
-            User user = queue.dequeue();
-            System.out.println("Puesto " + (i+1) + ": "+ user.getUserName() + " - " + user.getUserTweets().getSize() + " tweets. Verificado?: " + user.isUserVerified());
         }
     }
 
