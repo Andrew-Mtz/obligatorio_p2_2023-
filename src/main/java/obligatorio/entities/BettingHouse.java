@@ -25,9 +25,14 @@ public class BettingHouse {
 // ----------------------------***********************************------------------------------
 
     // Declaro las Variables de Instancia de la clase BettingHouse.
-    //private static final String F1_DATASET = "C:\\Users\\Usuario\\Downloads\\obligatorio2023 (1)\\f1_dataset_test.csv";
-    private static final String F1_DATASET = "C:\\Users\\Usuario\\Downloads\\f1_dataset_test_test.csv";
+
+    private static final String F1_DATASET = "f1_dataset_test.csv";
+    private static final String currentDirectory = System.getProperty("user.dir");
+
+    // Concatenar la ruta actual con el nombre del archivo
+    private static final String F1_DATA = currentDirectory+ "\\" + F1_DATASET;
     private static final String DRIVERS_DATASET = "drivers.txt";
+    private static final String DRIVERS = currentDirectory + "\\" + DRIVERS_DATASET;
     private final ListaEnlazada<Driver> drivers;
 
     public ListaEnlazada<Tweet> tweets;
@@ -53,7 +58,7 @@ public class BettingHouse {
 
     public void loadDriversData() {
         try {
-            File file = new File(DRIVERS_DATASET);
+            File file = new File(DRIVERS);
             FileReader fileReader = new FileReader(file);
             BufferedReader bufferedReader = new BufferedReader(fileReader);
             String line;
@@ -84,7 +89,7 @@ public class BettingHouse {
         int lineCount = 0;
         int ignoredLineCount = 0;
 
-        try (BufferedReader reader = new BufferedReader(new FileReader(F1_DATASET));
+        try (BufferedReader reader = new BufferedReader(new FileReader(F1_DATA));
              CSVParser csvParser = CSVParser.parse(reader, CSVFormat.DEFAULT.withFirstRecordAsHeader().withHeader("tweet_id", "user_name", "user_location", "user_description", "user_created", "user_followers", "user_friends", "user_favourites", "user_verified", "date", "text", "hashtags", "source", "is_retweet"))) {
 
             for (CSVRecord csvRecord : csvParser) {

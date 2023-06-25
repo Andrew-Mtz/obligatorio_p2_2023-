@@ -112,6 +112,8 @@ public class Principal {
 
                                     timeEnd = System.currentTimeMillis();
                                     System.out.println("Tiempo consumido: " + (timeEnd - timeStart) +" milisegundos");
+                                    long memoryUsed = memoryUsage.getUsed();
+                                    System.out.println("Memoria utilizada: " + memoryUsed + " bytes");
 
                                     optionQuery = 0;
 
@@ -125,6 +127,8 @@ public class Principal {
 
                                     timeEnd = System.currentTimeMillis();
                                     System.out.println("Tiempo consumido: " + (timeEnd - timeStart) +" milisegundos");
+                                    long memoryUsed = memoryUsage.getUsed();
+                                    System.out.println("Memoria utilizada: " + memoryUsed + " bytes");
 
                                     optionQuery = 0;
 
@@ -140,6 +144,8 @@ public class Principal {
 
                                     timeEnd = System.currentTimeMillis();
                                     System.out.println("Tiempo consumido: " + (timeEnd - timeStart) +" milisegundos");
+                                    long memoryUsed = memoryUsage.getUsed();
+                                    System.out.println("Memoria utilizada: " + memoryUsed + " bytes");
 
 
                                     optionQuery = 0;
@@ -157,6 +163,8 @@ public class Principal {
 
                                 timeEnd = System.currentTimeMillis();
                                 System.out.println("Tiempo consumido: " + (timeEnd - timeStart) +" milisegundos");
+                                long memoryUsed = memoryUsage.getUsed();
+                                System.out.println("Memoria utilizada: " + memoryUsed + " bytes");
 
                                 optionQuery = 0;
 
@@ -169,6 +177,8 @@ public class Principal {
 
                                     timeEnd = System.currentTimeMillis();
                                     System.out.println("Tiempo consumido: " + (timeEnd - timeStart) +" milisegundos");
+                                    long memoryUsed = memoryUsage.getUsed();
+                                    System.out.println("Memoria utilizada: " + memoryUsed + " bytes");
 
                                     optionQuery = 0;
 
@@ -181,6 +191,8 @@ public class Principal {
 
                                     timeEnd = System.currentTimeMillis();
                                     System.out.println("Tiempo consumido: " + (timeEnd - timeStart) +" milisegundos");
+                                    long memoryUsed = memoryUsage.getUsed();
+                                    System.out.println("Memoria utilizada: " + memoryUsed + " bytes");
 
                                     optionQuery = 0;
 
