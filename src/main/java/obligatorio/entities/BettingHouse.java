@@ -1,16 +1,20 @@
 package obligatorio.entities;
 
-import obligatorio.keys.KeyUser;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
-import uy.edu.um.prog2.adt.hash.MyCloseHashImpl;
-import uy.edu.um.prog2.adt.hash.MyHash;
+import uy.edu.um.prog2.adt.exceptions.EmptyQueueException;
 import uy.edu.um.prog2.adt.lista.ListaEnlazada;
-import uy.edu.um.prog2.adt.lista.MyList;
+import uy.edu.um.prog2.adt.queue.MyPriorityQueue;
+import uy.edu.um.prog2.adt.queue.MyPriorityQueueImpl;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.Arrays;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Scanner;
 import java.util.logging.Logger;
 
@@ -23,17 +27,12 @@ public class BettingHouse {
     // Declaro las Variables de Instancia de la clase BettingHouse.
     private static final String F1_DATASET = "C:\\Users\\Usuario\\Downloads\\obligatorio2023 (1)\\f1_dataset_test.csv";
     private static final String DRIVERS_DATASET = "drivers.txt";
-    private final MyList<Driver> drivers;
+    private final ListaEnlazada<Driver> drivers;
 
     public ListaEnlazada<Tweet> tweets;
 
-    /* Debido a que la Key del hash será de la clase String en el caso de "user" y "hashTags", podría pasar
-       que dicho "key" fuese negativo. Debo asegurarme que ello no suceda, por lo que me crearé una clase
-       "KeyUser" y "KeyHashTag" en las cuales tienen como insumo/argumento un string y el mismo es modificado
-       por el método de esa clase (hashCode) para asegurarse que el valor sea SIEMPRE positivo. */
     public ListaEnlazada<User> users;
     public ListaEnlazada<HashTag> hashTagsListTotal;
-    private final MyHash<KeyUser, Integer> userTweetCounts;
 
     // ----------------------------***********************************------------------------------
 
@@ -43,12 +42,11 @@ public class BettingHouse {
         this.tweets = new ListaEnlazada<>();
         this.users = new ListaEnlazada<>();
         this.hashTagsListTotal = new ListaEnlazada<>();
-        this.userTweetCounts = new MyCloseHashImpl<>(11599, true);
     }
 
 // ----------------------------***********************************------------------------------
 
-    // DECLARAMOS LOS MÉTODOS DE LA CLASE
+    // Comenzamos con los metodos para levantar la info del CSV y del txt.
 
 // ----------------------------***********************************------------------------------
 
@@ -59,23 +57,17 @@ public class BettingHouse {
             BufferedReader bufferedReader = new BufferedReader(fileReader);
             String line;
 
-            // Separo cada linea por los espacios en blanco y guardo cada segmento en un array, el cual
-            // tendrá como primer elemento el nombre y los siguientes serán los apellidos.
             while ((line = bufferedReader.readLine()) != null) {
                 String[] driver = line.split(" ");
 
-                // Declaro una instancia de la clase Driver, la cual se inicializará tantas veces como
-                // lineas en bufferReader existan (cada una es un piloto) siendo su nombre y apellido
-                // los elementos del array "driver".
                 Driver temp;
                 if (driver.length > 2) {
-                    // Nyck de Vries   es el unico caso donde el array asociado tiene tres elementos.
+                    // Nyck de Vries es el unico caso donde el array asociado tiene tres elementos.
                     temp = new Driver(driver[0], driver[1] + " " + driver[2]);
                 } else {
                     temp = new Driver(driver[0], driver[1]);
                 }
-                // finalmente, se agrega cada instancia de Driver creada a la lista enlazada de drivers
-                // (uno por uno) de la clase BettinHouse.
+
                 this.drivers.add(temp);
             }
         } catch (IOException e) {
@@ -87,122 +79,57 @@ public class BettingHouse {
 // ----------------------------***********************************------------------------------
 
     public void loadTwitterData() {
-        long idHashTag = 1;
 
         int lineCount = 0;
         int ignoredLineCount = 0;
 
-        try (Reader reader = new FileReader(F1_DATASET);
+        try (BufferedReader reader = new BufferedReader(new FileReader(F1_DATASET));
              CSVParser csvParser = CSVParser.parse(reader, CSVFormat.DEFAULT.withFirstRecordAsHeader().withHeader("tweet_id", "user_name", "user_location", "user_description", "user_created", "user_followers", "user_friends", "user_favourites", "user_verified", "date", "text", "hashtags", "source", "is_retweet"))) {
 
             for (CSVRecord csvRecord : csvParser) {
                 lineCount++;
 
                 try {
-                    // Extract specific columns
-                    long idTweet;
+                    // Las columnas a extraer
+                    long idTweet = Long.parseLong(csvRecord.get("tweet_id"));
                     String userName = csvRecord.get("user_name");
-                    boolean usuarioVerificado;
-                    float favorites;
+                    boolean usuarioVerificado = Boolean.parseBoolean(csvRecord.get("user_verified"));
+                    float favorites = Float.parseFloat(csvRecord.get("user_favourites"));
                     String hashTags = csvRecord.get("hashtags");
-                    boolean retweeted;
-                    String tweetDate;
+                    boolean retweeted = Boolean.parseBoolean(csvRecord.get("is_retweet"));
+                    String tweetDate = csvRecord.get("date");
                     String tweetContent = csvRecord.get("text");
                     String tweetSource = csvRecord.get("source");
 
-                    // Check if the tweet ID matches the desired value
-                    if (csvRecord.isSet("tweet_id")) {
-                        try {
-                            idTweet = Long.parseLong(csvRecord.get("tweet_id"));
-                        } catch (NumberFormatException e) {
-                            throw new RuntimeException("Invalid tweet_id at line " + lineCount);
+                    // Eliminamos la hora de la fecha.
+                    String[] dateTimeParts = tweetDate.split(" ");
+                    String datePart = dateTimeParts[0];
+                    tweetDate = datePart;
+
+                    // Separamos los hashtags del tweet en una lista
+                    List<String> hashtagList = Arrays.asList(hashTags.toLowerCase().split(", "));
+                    ListaEnlazada<HashTag> tweetHashtags = new ListaEnlazada<>();
+
+                    for (String hashtagText : hashtagList) {
+                        // Remove the square brackets and single quotes from each hashtag
+                        String cleanedHashtag = hashtagText.replaceAll("\\[|'|\\]", "");
+
+                        // Create a new HashTag object
+                        HashTag hashtag = new HashTag(cleanedHashtag);
+
+                        // Add the hashtag to the tweet's hashtag list
+                        tweetHashtags.add(hashtag);
+
+                        // Add the hashtag to the main list if it's not already present
+                        if (!hashTagsListTotal.contains(hashtag)) {
+                            hashTagsListTotal.add(hashtag);
                         }
-                    } else {
-                        throw new RuntimeException("Missing tweet_id at line " + lineCount);
                     }
 
-                    if (csvRecord.isSet("user_verified")) {
-                        String verifiedValue = csvRecord.get("user_verified").toLowerCase();
-                        if (verifiedValue.equals("true") || verifiedValue.equals("false")) {
-                            usuarioVerificado = Boolean.parseBoolean(verifiedValue);
-                        } else {
-                            throw new RuntimeException("Invalid user_verified value at line " + lineCount);
-                        }
-                    } else {
-                        throw new RuntimeException("Missing user_verified at line " + lineCount);
-                    }
-
-                    if (csvRecord.isSet("user_favourites")) {
-                        try {
-                            favorites = Float.parseFloat(csvRecord.get("user_favourites"));
-                        } catch (NumberFormatException e) {
-                            throw new RuntimeException("Invalid user_favourites at line " + lineCount);
-                        }
-                    } else {
-                        throw new RuntimeException("Missing user_favourites at line " + lineCount);
-                    }
-
-                    // Process the date string (YYYY-MM-DD H:MM:SS) into a Date object
-                    if (csvRecord.isSet("date")) {
-                        String dateString = csvRecord.get("date");
-                        String[] dateTimeParts = dateString.split(" ");
-                        String datePart = dateTimeParts[0];
-                        String[] dateComponents = datePart.split("-");
-                        String year = dateComponents[0];
-                        String month = dateComponents[1];
-                        String day = dateComponents[2];
-                        String dateStringFormatted = year + "-" + month + "-" + day;
-                        tweetDate = dateStringFormatted;
-
-                    } else {
-                        throw new RuntimeException("Missing date at line " + lineCount);
-                    }
-
-
-
-
-                    // Process the retweeted value
-                    if (csvRecord.isSet("is_retweet")) {
-                        String retweetedValue = csvRecord.get("is_retweet").toLowerCase();
-                        if (retweetedValue.equals("true") || retweetedValue.equals("false")) {
-                            retweeted = Boolean.parseBoolean(retweetedValue);
-                        } else {
-                            throw new RuntimeException("Invalid is_retweet value at line " + lineCount);
-                        }
-                    } else {
-                        throw new RuntimeException("Missing is_retweet at line " + lineCount);
-                    }
-
-                    // Split the hashtags string into individual hashtags
-                    String hashtagString = csvRecord.get("hashtags").toLowerCase();
-
-                    ListaEnlazada<HashTag> tweetHashtags = null;
-                    if (!hashtagString.isEmpty()) {
-                        String[] hashtagArray = hashtagString.split(", ");
-                        tweetHashtags = new ListaEnlazada<>();
-
-                        for (String hashtagText : hashtagArray) {
-                            // Remove the square brackets and single quotes from each hashtag
-                            String cleanedHashtag = hashtagText.replaceAll("\\[|'|\\]", "");
-
-                            // Create a new HashTag object
-                            HashTag hashtag = new HashTag(cleanedHashtag);
-
-                            // Add the hashtag to the tweet's hashtag list
-                            tweetHashtags.add(hashtag);
-
-                            // Add the hashtag to the main list if it's not already present
-                            if (!hashTagsListTotal.contains(hashtag)) {
-                                hashTagsListTotal.add(hashtag);
-                            }
-                        }
-
-                    }
-
-                    // Create the User object
+                    // Creamos el objeto User
                     User user = new User(userName, usuarioVerificado);
 
-                    // Create Tweet object
+                    // Creamos el objeto Tweet
                     Tweet tweet = new Tweet(idTweet, tweetContent, tweetSource, retweeted, user, tweetDate);
                     tweet.setHashTagsOfThisTweet(tweetHashtags);
 
@@ -216,14 +143,12 @@ public class BettingHouse {
                         users.add(user);
                     }
 
-
-                    // Add the tweet to the tweets list and to the user tweets list
+                    // Agregamos el tweet a la lista de tweets
                     tweets.add(tweet);
-                    System.out.println();
 
-                } catch (RuntimeException e) {
+                } catch (NumberFormatException | IndexOutOfBoundsException e) {
                     ignoredLineCount++;
-                    System.err.println(e.getMessage());
+                    System.err.println("Invalid data at line " + lineCount);
                 }
             }
 
@@ -233,30 +158,54 @@ public class BettingHouse {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
         System.out.println("Cantidad de usuarios distintos:");
         System.out.println(users.getSize());
         System.out.println("Cantidad de tweets registrados:");
         System.out.println(tweets.getSize());
     }
 
+    // ----------------------------***********************************------------------------------
 
+    // Debajo se definen los metodos para la formación de los reportes.
 
-
-
-    // Helper method to find an existing user based on user ID and username
-    private User findExistingUser(User newUser) {
-        for (User existingUser : users) {
-            if (existingUser.getIdUser() == newUser.getIdUser() && existingUser.getUserName().equals(newUser.getUserName())) {
-                return existingUser;
-            }
-        }
-        return null; // User not found
 // ----------------------------***********************************------------------------------
 
-        // Terminamos con los métodos para cargar la información cuya fuente son archivos externos (TXT y CSV)
-        // y pasamos a definir las funciones/métodos de CONSULTA.
+    // Top 15 usuarios con más tweets
+    public void top15UsersWithTheMostTweets() throws EmptyQueueException {
+
+        MyPriorityQueue<User> queue = new MyPriorityQueueImpl<>();
+
+        for (int i = 0; i < users.getSize(); i++) {
+            User user = users.get(i);
+            int tweetSize = user.getUserTweets().getSize();
+            queue.enqueueWithPriority(user, tweetSize);
+        }
+
+        for (int i = 0; i < 15 && !queue.isEmpty(); i++) {
+            User user = queue.dequeue();
+            System.out.println(user.getUserName() + " tiene " + user.getUserTweets().getSize() + " tweets. Verificado?: " + user.isUserVerified());
+        }
     }
 
+    // Top 15 usuarios con más tweets (más rápido)
+    public void top15UsersWithTheMostTweetsFaster() throws EmptyQueueException {
+        MyPriorityQueue<User> queue = new MyPriorityQueueImpl<>();
+
+        for (int i = 0; i < users.getSize(); i++) {
+            User user = users.get(i);
+            int tweetSize = user.getUserTweets().getSize();
+            queue.enqueueWithPriority(user, tweetSize);
+        }
+
+        int count = Math.min(15, queue.getSize());
+        for (int i = 0; i < count; i++) {
+            User user = queue.dequeue();
+            System.out.println("Puesto " + (i+1) + ": "+ user.getUserName() + " - " + user.getUserTweets().getSize() + " tweets. Verificado?: " + user.isUserVerified());
+        }
+    }
+
+    // Cantidad de tweets con una palabra o frase específica
     public int countTweetsWithWordOrPhrase(String wordOrPhrase) {
         int count = 0;
         String lowercaseWordOrPhrase = wordOrPhrase.toLowerCase();
@@ -271,6 +220,7 @@ public class BettingHouse {
         return count;
     }
 
+    // Buscar tweet por palabra o frase
     public void searchTweetsByWordOrPhrase() {
         Scanner scanner = new Scanner(System.in);
         System.out.print("Enter a word or phrase to search for: ");
@@ -278,9 +228,10 @@ public class BettingHouse {
 
         int tweetCount = countTweetsWithWordOrPhrase(wordOrPhrase);
 
-        System.out.println("Number of tweets containing '" + wordOrPhrase + "': " + tweetCount);
+        System.out.println("Cantidad de tweets que contienen '" + wordOrPhrase + "': " + tweetCount);
     }
 
+    // Top usuarios con mas favoritos.
     public void printTopUsers(int count) {
         if (count <= 0) {
             System.out.println("Invalid count.");
@@ -290,19 +241,16 @@ public class BettingHouse {
         ListaEnlazada<User> sortedList = new ListaEnlazada<>();
         ListaEnlazada<User> temp = new ListaEnlazada<>();
 
-        // Copy the users to a temporary list
         Iterator<User> iterator = users.iterator();
         while (iterator.hasNext()) {
             User user = iterator.next();
             temp.addLast(user);
         }
 
-        // Find and add the top users to the sorted list
         for (int i = 0; i < count; i++) {
             User topUser = null;
             float maxFavorites = Long.MIN_VALUE;
 
-            // Find the user with the highest favorites
             Iterator<User> tempIterator = temp.iterator();
             while (tempIterator.hasNext()) {
                 User user = tempIterator.next();
@@ -318,29 +266,28 @@ public class BettingHouse {
                 sortedList.addLast(topUser);
                 temp.removePorValue(topUser);
             } else {
-                break; // No more users to add, exit the loop
+                break;
             }
         }
 
-        // Print the top users
         Iterator<User> sortedIterator = sortedList.iterator();
+        int i = 1;
         while (sortedIterator.hasNext()) {
             User user = sortedIterator.next();
-            System.out.println(user.getUserName() + ": " + user.getFavourites() + " favorites");
+            System.out.println("Puesto " + i + ": " + user.getUserName() + " - " + user.getFavourites() + " favoritos.");
+            i++;
         }
     }
 
-
+// Hashtag mas utilizado en una fecha dada
     public String getMostUsedHashtagByDate(String date) {
         ListaEnlazada<HashTag> hashtagList = new ListaEnlazada<>();
 
-        // Iterate over all the tweets
         for (Tweet tweet : tweets) {
             if (tweet.getDate().equals(date)) {
-                // Get the hashtags of the tweet
                 ListaEnlazada<HashTag> hashTagsOfThisTweet = tweet.getHashTagsOfThisTweet();
 
-                // Add the hashtags to the main list, excluding "F1"
+                // Excluimos el hashtag F1
                 for (HashTag hashtag : hashTagsOfThisTweet) {
                     if (!hashtag.getText().equalsIgnoreCase("f1")) {
                         hashtagList.add(hashtag);
@@ -349,7 +296,6 @@ public class BettingHouse {
             }
         }
 
-        // Find the most used hashtag
         String mostUsedHashtag = "";
         int maxCount = 0;
         for (HashTag hashtag : hashtagList) {
@@ -363,11 +309,10 @@ public class BettingHouse {
         return mostUsedHashtag;
     }
 
-
+    // Cantidad de veces que se utilizó un hashtag en una fecha dada
     private int countOccurrences(HashTag hashtag, ListaEnlazada<HashTag> hashtagList) {
         int count = 0;
         for (HashTag currentHashtag : hashtagList) {
-            // Exclude the current hashtag being checked
             if (currentHashtag.equals(hashtag) && !currentHashtag.getText().equalsIgnoreCase("f1")) {
                 count++;
             }
@@ -375,16 +320,15 @@ public class BettingHouse {
         return count;
     }
 
+    // Cantidad de hashtags diferentes en una fecha dada
     public int countDifferentHashtagsByDate(String date) {
         ListaEnlazada<HashTag> hashtagList = new ListaEnlazada<>();
 
-        // Iterate over all the tweets
         for (Tweet tweet : tweets) {
             if (tweet.getDate().equals(date)) {
-                // Get the hashtags of the tweet
                 ListaEnlazada<HashTag> hashTagsOfThisTweet = tweet.getHashTagsOfThisTweet();
 
-                // Add the hashtags to the main list, excluding "F1"
+                // Seguimos excluyendo el hashtag F1
                 for (HashTag hashtag : hashTagsOfThisTweet) {
                     if (!hashtag.getText().equalsIgnoreCase("f1")) {
                         hashtagList.add(hashtag);
@@ -393,13 +337,10 @@ public class BettingHouse {
             }
         }
 
-        // Create a counter variable
         int count = 0;
 
-        // Create a set to track unique hashtags
         ListaEnlazada<HashTag> uniqueHashtags = new ListaEnlazada<>();
 
-        // Iterate over the hashtag list and check for unique hashtags
         for (HashTag hashtag : hashtagList) {
             if (!uniqueHashtags.contains(hashtag)) {
                 uniqueHashtags.add(hashtag);
@@ -407,22 +348,56 @@ public class BettingHouse {
             }
         }
 
-        // Return the count of unique hashtags
         return count;
     }
 
-    public int countTweetsByDate(ListaEnlazada<Tweet> tweets, String date) {
-        int count = 0;
-        for (int i = 0; i < tweets.getSize(); i++) {
-            Tweet tweet = tweets.get(i);
-            if (tweet.getDate().equals(date)) {
-                count++;
+    // Top 10 de pilotos con más menciones en un mes y año dado
+    public void top10Drivers() throws EmptyQueueException {
+        Scanner scanner = new Scanner(System.in);
+
+        System.out.print("Ingrese el mes: ");
+        String month = scanner.nextLine();
+
+        System.out.print("Ingrese el año: ");
+        String year = scanner.nextLine();
+
+        ListaEnlazada<Tweet> tweetsDelPeriodo = new ListaEnlazada<>();
+
+        for (Tweet tweet : tweets) {
+            String[] fechaDelTweetSeparada = tweet.getDate().split("-");
+            String monthTweet = fechaDelTweetSeparada[1];
+            String yearTweet = fechaDelTweetSeparada[0];
+            if (monthTweet.equals(month) && yearTweet.equals(year)) {
+                tweetsDelPeriodo.addLast(tweet);
             }
         }
-        return count;
+
+        MyPriorityQueue<Driver> queueDrivers = new MyPriorityQueueImpl<>();
+
+        for (Driver driver : drivers) {
+            int count = 0;
+            String lowercaseDriverLastName = driver.getLastName().toLowerCase();
+
+            for (Tweet tweet : tweetsDelPeriodo) {
+                String lowercaseContent = tweet.getContent().toLowerCase();
+                if (lowercaseContent.contains(lowercaseDriverLastName)) {
+                    count++;
+                }
+            }
+
+            queueDrivers.enqueueWithPriority(driver, count);
+
+        }
+
+        System.out.println("Top 10 Drivers:");
+        for (int i = 0; i < 10; i++) {
+            if(queueDrivers.getSize()>0){
+                Driver driver = queueDrivers.getFirst();
+                System.out.println("Puesto " + (i+1) + ": " + driver +  " - " + queueDrivers.getFirstPriority() + " menciones.");
+                queueDrivers.dequeue();
+
+            }
+        }
+
     }
-
-
-
-
 }

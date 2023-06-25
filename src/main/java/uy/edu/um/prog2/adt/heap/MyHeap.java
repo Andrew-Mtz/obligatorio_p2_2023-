@@ -10,6 +10,4 @@ public interface MyHeap<T extends Comparable<T>> {
 
     String toString ();
 
-
-
 }

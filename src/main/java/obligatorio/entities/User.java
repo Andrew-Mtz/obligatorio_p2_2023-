@@ -5,7 +5,7 @@ import uy.edu.um.prog2.adt.lista.MyList;
 
 import java.util.Objects;
 
-public class User implements Comparable {
+public class User implements Comparable<User> {
 
     // Declaro las variables de instancia de la clase.
     private static long idCounter = 0;
@@ -30,20 +30,8 @@ public class User implements Comparable {
     // Declaro los métodos de la clase
 
     @Override
-    public int compareTo(Object o) {
-        int comparacion = 0;
-
-        if (o instanceof User) {
-            if (this.idUser < ((User) o).idUser) {
-                comparacion = -1;
-            }
-            else if (this.idUser > ((User) o).idUser) {
-                comparacion = 1;
-            }
-        }
-
-
-        return comparacion;
+    public int compareTo(User otherUser) {
+        return Long.compare(this.idUser, otherUser.idUser);
     }
 
 
@@ -103,4 +91,7 @@ public class User implements Comparable {
     public void setFavourites(float favourites) {
         this.favourites = favourites;
     }
+
+
+
 }
